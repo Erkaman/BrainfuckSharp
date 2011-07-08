@@ -44,7 +44,11 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Ast.cs" />
+    <Compile Include="AbstractSyntaxTree\Statement.cs" />
+    <Compile Include="AbstractSyntaxTree\Block.cs" />
+    <Compile Include="AbstractSyntaxTree\Command.cs" />
+    <Compile Include="AbstractSyntaxTree\CommandType.cs" />
+    <Compile Include="AbstractSyntaxTree\Loop.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

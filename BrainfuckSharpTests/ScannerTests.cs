@@ -3,6 +3,7 @@ using BrainfuckSharp;
 using NUnit.Framework;
 using System.IO;
 using System;
+using BrainfuckSharp.AbstractSyntaxTree;
 
 namespace BrainfuckSharpTests
 {
@@ -12,8 +13,7 @@ namespace BrainfuckSharpTests
         [Test]
         public void ConstructorTest()
         {
-            string test =               
-@"<>+-.[,+ [++] - ]";
+            string test = @"<>+-.[,+ [++] - ]";
 
             StringReader input = new StringReader(test);
 
@@ -31,7 +31,6 @@ namespace BrainfuckSharpTests
             AddCommand(CommandType.IncrementAtPointer);
             AddCommand(CommandType.DecrementAtPointer);
             AddCommand(CommandType.OutputCharacter);
-            AddCommand(CommandType.InputCharacter);
 
             Block loopBody = new Block();
                       
@@ -60,6 +59,8 @@ namespace BrainfuckSharpTests
             Loop loop = new Loop(loopBody);
 
             result.Statements.Add(loop);
+
+            Assert.AreEqual(result,parser.Result);
         }
     }
 }

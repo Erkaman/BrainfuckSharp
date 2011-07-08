@@ -2,6 +2,7 @@
 using System.Text;
 using System;
 using System.Linq;
+using BrainfuckSharp.AbstractSyntaxTree;
 
 namespace BrainfuckSharp
 {
@@ -85,7 +86,8 @@ namespace BrainfuckSharp
                                         tokens.Skip(i + 1).Take(j - i - 1));
 
                                     // Parse the body of the loop.
-                                    Loop loop = new Loop(ParseTokens(loopTokens));
+                                    Loop loop = 
+                                        new Loop(ParseTokens(loopTokens));
 
                                     // add the loop to the result.
                                     result.Statements.Add(loop);
@@ -96,6 +98,8 @@ namespace BrainfuckSharp
                                     break;
                                 }
                             }
+                            if (unmatchedBrackets != 0)
+                                throw new Exception("Unbalanced bracket");
 
                             break;
                         }
