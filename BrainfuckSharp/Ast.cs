@@ -77,6 +77,14 @@ namespace BrainfuckSharp
         /// A block of statements.
         /// </summary>
         public IList<Statement> Statements;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Block"/> class.
+        /// </summary>
+        public Block()
+        {
+            Statements = new List<Statement>();
+        }
     }
 
     /// <summary>
