@@ -1,4 +1,5 @@
-﻿namespace BrainfuckSharp
+﻿using System.Collections.Generic;
+namespace BrainfuckSharp
 {
     /// <summary>
     /// A statement in the Brainfuck language.
@@ -16,6 +17,15 @@
         /// The type of the command.
         /// </summary>
         public CommandType CommandType;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Command"/> class.
+        /// </summary>
+        /// <param name="commandType">The type of command.</param>
+        public Command(CommandType commandType)
+        {
+            this.CommandType = commandType;
+        }
     }
 
     /// <summary>
@@ -59,19 +69,14 @@
     }
 
     /// <summary>
-    /// A sequence of statements in the brainfuck language.
+    /// A block of statements in the brainfuck language.
     /// </summary>
-    public class Sequence : Statement
+    public class Block : Statement
     {
         /// <summary>
-        /// The first statment,
+        /// A block of statements.
         /// </summary>
-        public Statement First;
-
-        /// <summary>
-        /// The second statement.
-        /// </summary>
-        public Statement Second;
+        public IList<Statement> Statements;
     }
 
     /// <summary>
@@ -82,6 +87,15 @@
         /// <summary>
         /// The body of the loop.
         /// </summary>
-        public Statement Body;
+        public Block Body;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Loop"/> class.
+        /// </summary>
+        /// <param name="body">The body of the loop.</param>
+        public Loop(Block body)
+        {
+            Body = body;
+        }
     }
 }

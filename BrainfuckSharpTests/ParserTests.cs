@@ -7,18 +7,27 @@ using System.IO;
 namespace BrainfuckSharpTests
 {
     [TestFixture]
-    class ScannerTests
+    class ParserTests
     {
         [Test]
         public void ConstructorTest()
         {
-            string test =               
-@"<>+-.,";
+            string test =
+@"++bla bla fff - , [ ] ] [ ,. < >> < --
+
+k ,
+";
+            IList<char> expected = new List<char>()
+            {
+                '+','+','-',',','[',']',']','[',',','.','<','>','>','<','-','-',
+                ','
+            };
 
             StringReader input = new StringReader(test);
 
             Scanner scanner = new Scanner(input);
-            Parser parser = new Parser(scanner.Tokens);
+
+            Assert.AreEqual(expected, scanner.Tokens);
         }
     }
 }

@@ -8,13 +8,21 @@ namespace BrainfuckSharp
     /// </summary>
     public class Scanner
     {
+        readonly IList<char> tokens;
+
         /// <summary>
         /// Gets or sets the tokens of the code.
         /// </summary>
         /// <value>
         /// The tokens of the code.
         /// </value>
-        public IList<char> Tokens { get; set; }
+        public IList<char> Tokens 
+        {
+            get
+            {
+                return tokens;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Scanner"/> class.
@@ -22,7 +30,7 @@ namespace BrainfuckSharp
         /// <param name="input">The input to scan the tokens from.</param>
         public Scanner(TextReader input)
         {
-            Tokens = new List<char>();
+            tokens = new List<char>();
             symbols = new List<char>()
             {
                 '<',
@@ -48,7 +56,7 @@ namespace BrainfuckSharp
                 // The item is a token if and only if it is a character in the 
                 // syntax of Brainfuck.
                 if (symbols.Contains(ch))
-                    Tokens.Add(ch);
+                    tokens.Add(ch);
             }
         }
 

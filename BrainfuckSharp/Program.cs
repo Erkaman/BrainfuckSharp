@@ -61,6 +61,7 @@ namespace BrainfuckSharp
 
                                 if (unmatchedBrackets == 0)
                                 {
+
                                     while(cells[p] != 0)
                                         InterpretBrainfuckHelper(
                                             code.Substring(i+1, j-i-1),
