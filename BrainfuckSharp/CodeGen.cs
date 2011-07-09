@@ -51,8 +51,7 @@ namespace BrainfuckSharp
             DeclareVariables();
 
             // Compile the code.
-            this.GenStmt(block);
-
+            this.GenBlock(block);
 
             // return from the main function.
             il.Emit(OpCodes.Ret);
@@ -128,7 +127,7 @@ namespace BrainfuckSharp
 
         }
 
-        private void GenStmt(Block block)
+        private void GenBlock(Block block)
         {
             foreach (Statement statement in block.Statements)
             {
@@ -195,6 +194,47 @@ namespace BrainfuckSharp
                 }
                 else if (statement is Loop)
                 {
+                    Loop loop = (Loop)statement;
+                    Label testLabel = il.DefineLabel();
+                    Label bodyLabel = il.DefineLabel();
+
+                    // go to testLabel and make the while loop test
+                    il.Emit(OpCodes.Br, testLabel);
+
+                    // bodyLabel:
+                    il.MarkLabel(bodyLabel);
+                    GenBlock(loop.Body);
+
+                    // testLabel: make the test.
+                    il.MarkLabel(testLabel);
+
+                    il.Emit(OpCodes.Ldloc,cells);
+                    il.Emit(OpCodes.Ldloc,p);
+
+                                il.Emit(OpCodes.Call,
+                typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) })
+                );
+  //IL_001b:  callvirt   instance !0 class [mscorlib]System.Collections.Generic.List`1<uint8>::get_Item(int32)
+
+                    il.Emit(OpCodes.Ldc_I4_0);
+  //IL_0020:  ldc.i4.0
+                    il.Emit(OpCodes.Ceq);
+ // IL_0021:  ceq
+                    il.Emit(OpCodes.Ldc_I4_0);
+  //IL_0023:  ldc.i4.0
+  //IL_0024:  ceq
+      il.Emit(OpCodes.Ceq);
+                    LocalBuilder temp = il.DeclareLocal(typeof(int));
+                    il.Emit(OpCodes.Stloc,temp);
+                    il.Emit(OpCodes.Ldloc,temp);
+  /*IL_0026:  stloc.2
+  IL_0027:  ldloc.2*/
+                    il.Emit(OpCodes.Brtrue,bodyLabel);
+  //IL_0028:  brtrue.s   IL_0013
+
+
+
+                    // if the test is true go to label bodyLabel. else do nothing.
                 }
                 else
                 {

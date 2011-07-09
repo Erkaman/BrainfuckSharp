@@ -7,9 +7,7 @@ namespace Demo
     {
         static void Main(string[] args)
         {
-            string code = @"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.---.++.-------.>
-            
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.<----.";
+            string code = @"++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.";
             Scanner scanner = new Scanner(new StringReader(code));
             Parser parser = new Parser(scanner.Tokens);
             CodeGen codeGen = new CodeGen(parser.Result, "HelloWorld.exe");
