@@ -28,9 +28,7 @@ namespace BrainfuckSharp
         public static void CompileBlock(Block block, string moduleName)
         {
             if (Path.GetFileName(moduleName) != moduleName)
-            {
                 throw new Exception("can only output into current directory!");
-            }
 
             AssemblyName assemblyName = new AssemblyName(
                 Path.GetFileNameWithoutExtension(moduleName));
@@ -40,7 +38,8 @@ namespace BrainfuckSharp
                 assemblyName,
                 AssemblyBuilderAccess.Save);
 
-            ModuleBuilder moduleBuilder = assembly.DefineDynamicModule(moduleName);
+            ModuleBuilder moduleBuilder = 
+                assembly.DefineDynamicModule(moduleName);
             TypeBuilder programType = moduleBuilder.DefineType("Program");
 
             MethodBuilder mainMethod =
@@ -53,11 +52,9 @@ namespace BrainfuckSharp
             il = mainMethod.GetILGenerator();
 
             DeclareVariables();
-
-            // Actually compile the code.
             CompileBlock(block);
 
-            // Return from the main function.
+            // Return from the main method
             il.Emit(OpCodes.Ret);
 
             // Create the program type.
@@ -66,10 +63,7 @@ namespace BrainfuckSharp
             // Create the main method.
             moduleBuilder.CreateGlobalFunctions();
 
-            // Set the entrypoint to the main method.
             assembly.SetEntryPoint(mainMethod);
-
-            // Save the module to the file.
             assembly.Save(moduleName);
         }
 
@@ -97,7 +91,7 @@ namespace BrainfuckSharp
                             IncrementAtPointer(1);
                             break;
                         case CommandType.DecrementAtPointer:
-                            IncrementAtPointer(-1);
+                            DecrementAtPointer(1);
                             break;
                     }
                 }
@@ -135,10 +129,8 @@ namespace BrainfuckSharp
                     // if the test is true go to label bodyLabel. else do nothing.
                 }
                 else
-                {
                     throw new Exception(
                         "Don't know how to gen a " + statement.GetType().Name);
-                }
             }
         }
 
@@ -155,7 +147,7 @@ namespace BrainfuckSharp
 
             il.Emit(
                 OpCodes.Call,
-                typeof(System.Console).GetMethod("Write", new System.Type[] { typeof(byte) }));
+                typeof(Console).GetMethod("Write", new System.Type[] { typeof(byte) }));
         }
 
         /// <summary>
@@ -210,8 +202,19 @@ namespace BrainfuckSharp
             EmitUtility.StoreLocal(il, p);
         }
 
-        // ++cells[p];
+        // cells[p] += increase;
         private static void IncrementAtPointer(int increase)
+        {
+            ChangeAtPointer(OpCodes.Add, increase);
+        }
+
+        // cells[p] -= decrease;
+        private static void DecrementAtPointer(int decrease)
+        {
+            ChangeAtPointer(OpCodes.Sub, decrease);
+        }
+
+        private static void ChangeAtPointer(OpCode operation, int change)
         {
             // get cells[p]
             EmitUtility.LoadLocal(il, cells);
@@ -220,13 +223,13 @@ namespace BrainfuckSharp
                 typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) })
                 );
 
-            // increase + cells[p]
-            EmitUtility.LoadInt32(il, increase);
-            il.Emit(OpCodes.Add);
+            // increase op cells[p]
+            EmitUtility.LoadInt32(il, change);
+            il.Emit(operation);
 
-            // temp = increase + cells[p]
+            // temp = increase op cells[p]
             il.Emit(OpCodes.Stloc, temp);
-            
+
             // cells[p] = temp
             il.Emit(OpCodes.Ldloc, cells);
             il.Emit(OpCodes.Ldloc, p);
@@ -255,7 +258,6 @@ namespace BrainfuckSharp
             il.Emit(OpCodes.Ceq);
             il.Emit(OpCodes.Brfalse_S, incrementPointerLabel);
 
-            // increase the size by one.
             AddZeroToCells();
 
             il.MarkLabel(incrementPointerLabel);
