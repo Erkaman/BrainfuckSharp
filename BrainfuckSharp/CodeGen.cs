@@ -12,7 +12,7 @@ namespace BrainfuckSharp
     /// </summary>
     public static class CodeGen
     {
-        private static ILGenerator il = null;
+        private static ILGenerator il;
         private static LocalBuilder p;
         private static LocalBuilder cells;
 
@@ -54,7 +54,7 @@ namespace BrainfuckSharp
             // Declare the necessary variables.
             DeclareVariables();
 
-            // Compile the code.
+            // Actually compile the code.
             GenBlock(block);
 
             // Return from the main function.
@@ -72,6 +72,90 @@ namespace BrainfuckSharp
             // Save the module to the file.
             assembly.Save(moduleName);
         }
+
+        private static void GenBlock(Block block)
+        {
+            // generate the code for every statement.
+            foreach (Statement statement in block.Statements)
+            {
+                if (statement is Command)
+                {
+                    Command command = (Command)statement;
+                    switch (command.CommandType)
+                    {
+                        case CommandType.IncrementPointer:
+
+                            IncreaseSizeIfNecessary();
+                            IncrementPointer(1);
+                            // increase size.
+                            break;
+                        case CommandType.DecrementPointer:
+                            IncrementPointer(-1);
+                            break;
+                        case CommandType.OutputCharacter:
+
+                            il.Emit(OpCodes.Ldloc, cells);
+                            il.Emit(OpCodes.Ldloc, p);
+
+                            il.Emit(OpCodes.Call,
+                                typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) })
+                                );
+
+                            il.Emit(
+                                OpCodes.Call,
+                                typeof(System.Console).GetMethod("Write", new System.Type[] { typeof(byte) }));
+
+                            break;
+                        case CommandType.IncrementAtPointer:
+                            IncrementAtPointer(1);
+                            break;
+                        case CommandType.DecrementAtPointer:
+                            IncrementAtPointer(-1);
+                            break;
+                    }
+                }
+                else if (statement is Loop)
+                {
+                    Loop loop = (Loop)statement;
+                    Label testLabel = il.DefineLabel();
+                    Label bodyLabel = il.DefineLabel();
+
+                    // go to testLabel and make the while loop test
+                    il.Emit(OpCodes.Br, testLabel);
+
+                    // bodyLabel:
+                    il.MarkLabel(bodyLabel);
+                    GenBlock(loop.Body);
+
+                    // testLabel: make the test.
+                    il.MarkLabel(testLabel);
+
+                    il.Emit(OpCodes.Ldloc, cells);
+                    il.Emit(OpCodes.Ldloc, p);
+
+                    il.Emit(OpCodes.Call,
+                        typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) }));
+
+                    il.Emit(OpCodes.Ldc_I4_0);
+                    il.Emit(OpCodes.Ceq);
+                    il.Emit(OpCodes.Ldc_I4_0);
+                    il.Emit(OpCodes.Ceq);
+                    LocalBuilder temp = il.DeclareLocal(typeof(int));
+                    il.Emit(OpCodes.Stloc, temp);
+                    il.Emit(OpCodes.Ldloc, temp);
+                    il.Emit(OpCodes.Brtrue, bodyLabel);
+
+                    // if the test is true go to label bodyLabel. else do nothing.
+                }
+                else
+                {
+                    throw new Exception(
+                        "Don't know how to gen a " + statement.GetType().Name);
+                }
+            }
+        }
+
+        #region Private helpers
 
         /// <summary>
         /// Add a new cell containing zero to the list of the cells.
@@ -172,85 +256,6 @@ namespace BrainfuckSharp
             il.MarkLabel(incrementPointerLabel);
         }
 
-        private static void GenBlock(Block block)
-        {
-            foreach (Statement statement in block.Statements)
-            {
-                if (statement is Command)
-                {
-                    Command command = (Command)statement;
-                    switch (command.CommandType)
-                    {
-                        case CommandType.IncrementPointer:
-
-                            IncreaseSizeIfNecessary();
-                            IncrementPointer(1);
-                            // increase size.
-                            break;
-                        case CommandType.DecrementPointer:
-                            IncrementPointer(-1);
-                            break;
-                        case CommandType.OutputCharacter:
-
-                            il.Emit(OpCodes.Ldloc, cells);
-                            il.Emit(OpCodes.Ldloc, p);
-
-                            il.Emit(OpCodes.Call,
-                                typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) })
-                                );
-
-                            il.Emit(
-                                OpCodes.Call,
-                                typeof(System.Console).GetMethod("Write", new System.Type[] { typeof(byte) }));
-
-                            break;
-                        case CommandType.IncrementAtPointer:
-                            IncrementAtPointer(1);
-                            break;
-                        case CommandType.DecrementAtPointer:
-                            IncrementAtPointer(-1);
-                            break;
-                    }
-                }
-                else if (statement is Loop)
-                {
-                    Loop loop = (Loop)statement;
-                    Label testLabel = il.DefineLabel();
-                    Label bodyLabel = il.DefineLabel();
-
-                    // go to testLabel and make the while loop test
-                    il.Emit(OpCodes.Br, testLabel);
-
-                    // bodyLabel:
-                    il.MarkLabel(bodyLabel);
-                    GenBlock(loop.Body);
-
-                    // testLabel: make the test.
-                    il.MarkLabel(testLabel);
-
-                    il.Emit(OpCodes.Ldloc, cells);
-                    il.Emit(OpCodes.Ldloc, p);
-
-                    il.Emit(OpCodes.Call,
-                        typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) }) );
-
-                    il.Emit(OpCodes.Ldc_I4_0);
-                    il.Emit(OpCodes.Ceq);
-                    il.Emit(OpCodes.Ldc_I4_0);
-                    il.Emit(OpCodes.Ceq);
-                    LocalBuilder temp = il.DeclareLocal(typeof(int));
-                    il.Emit(OpCodes.Stloc, temp);
-                    il.Emit(OpCodes.Ldloc, temp);
-                    il.Emit(OpCodes.Brtrue, bodyLabel);
-
-                    // if the test is true go to label bodyLabel. else do nothing.
-                }
-                else
-                {
-                    throw new System.Exception(
-                        "don't know how to gen a " + statement.GetType().Name);
-                }
-            }
-        }
+        #endregion
     }
 }

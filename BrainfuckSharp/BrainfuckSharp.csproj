@@ -49,6 +49,7 @@
     <Compile Include="AbstractSyntaxTree\CommandType.cs" />
     <Compile Include="AbstractSyntaxTree\Loop.cs" />
     <Compile Include="CodeGen.cs" />
+    <Compile Include="EmitUtility.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
