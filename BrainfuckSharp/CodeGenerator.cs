@@ -67,35 +67,53 @@ namespace BrainfuckSharp
             assembly.Save(moduleName);
         }
 
+        static int repetitions = 1;
+
         private static void CompileBlock(Block block)
         {
             // generate the code for every statement.
-            foreach (Statement statement in block.Statements)
+            //foreach (Statement statement in block.Statements)
+            for (int i = 0; i < block.Statements.Count; ++i )
             {
+                Statement statement = block.Statements[i];
                 if (statement is Command)
                 {
                     Command command = (Command)statement;
-                    switch (command.CommandType)
+
+
+                    if ((i != block.Statements.Count - 1) &&
+                        block.Statements[i + 1] is Command &&
+                        command.CommandType == ((Command)block.Statements[i + 1]).CommandType &&
+                        command.CommandType != CommandType.OutputCharacter &&
+                        command.CommandType != CommandType.InputCharacter)
                     {
-                        case CommandType.IncrementPointer:
-                            IncreaseSizeIfNecessary();
-                            IncrementPointer(1);
-                            break;
-                        case CommandType.DecrementPointer:
-                            DecrementPointer(1);
-                            break;
-                        case CommandType.OutputCharacter:
-                            OutputCharacter();
-                            break;
-                        case CommandType.InputCharacter:
-                            InputCharacter();
-                            break;
-                        case CommandType.IncrementAtPointer:
-                            IncrementAtPointer(1);
-                            break;
-                        case CommandType.DecrementAtPointer:
-                            DecrementAtPointer(1);
-                            break;
+                        ++repetitions;
+                    }
+                    else
+                    {
+                        switch (command.CommandType)
+                        {
+                            case CommandType.IncrementPointer:
+                                IncreaseSizeIfNecessary();
+                                IncrementPointer(repetitions);
+                                break;
+                            case CommandType.DecrementPointer:
+                                DecrementPointer(repetitions);
+                                break;
+                            case CommandType.IncrementAtPointer:
+                                IncrementAtPointer(repetitions);
+                                break;
+                            case CommandType.DecrementAtPointer:
+                                DecrementAtPointer(repetitions);
+                                break;
+                            case CommandType.OutputCharacter:
+                                OutputCharacter();
+                                break;
+                            case CommandType.InputCharacter:
+                                InputCharacter();
+                                break;
+                        }
+                        repetitions = 1;
                     }
                 }
                 else if (statement is Loop)
@@ -157,17 +175,9 @@ namespace BrainfuckSharp
         {
             il.Emit(OpCodes.Call,
                 typeof(Console).GetMethod("Read", Type.EmptyTypes));
-
             EmitUtility.StoreLocal(il, temp);
 
             AssignAtPointer(temp);
-
-            /*EmitUtility.LoadLocal(il, cells);
-            EmitUtility.LoadLocal(il, p);
-            EmitUtility.LoadLocal(il, temp);
-            il.Emit(
-                OpCodes.Call,
-                typeof(Console).GetMethod("set_Item", new Type[] { typeof(byte) }));*/
         }
 
         /// <summary>
