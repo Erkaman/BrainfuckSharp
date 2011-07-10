@@ -10,11 +10,11 @@ namespace BrainfuckSharp
     /// <summary>
     /// Generates the code of the compiler.
     /// </summary>
-    public sealed class CodeGen
+    public static class CodeGen
     {
-        private ILGenerator il = null;
-        private LocalBuilder p;
-        private LocalBuilder cells;
+        private static ILGenerator il = null;
+        private static LocalBuilder p;
+        private static LocalBuilder cells;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CodeGen"/> class.
@@ -23,14 +23,15 @@ namespace BrainfuckSharp
         /// <param name="moduleName">
         /// The name of the compiled assembly.
         /// </param>
-        public CodeGen(Block block, string moduleName)
+        public static void CompileBlock(Block block, string moduleName)
         {
             if (Path.GetFileName(moduleName) != moduleName)
             {
                 throw new Exception("can only output into current directory!");
             }
 
-            AssemblyName assemblyName = new AssemblyName(moduleName);
+            AssemblyName assemblyName = new AssemblyName(
+                Path.GetFileNameWithoutExtension(moduleName));
 
             AssemblyBuilder assembly =
                 AppDomain.CurrentDomain.DefineDynamicAssembly(
@@ -70,13 +71,12 @@ namespace BrainfuckSharp
 
             // Save the module to the file.
             assembly.Save(moduleName);
-            this.il = null;
         }
 
         /// <summary>
         /// Add a new cell containing zero to the list of the cells.
         /// </summary>
-        private void AddZeroToCells()
+        private static void AddZeroToCells()
         {
             // cells.Add(0);
             il.Emit(OpCodes.Ldloc, cells);
@@ -86,7 +86,7 @@ namespace BrainfuckSharp
                 );
         }
 
-        private void DeclareVariables()
+        private static void DeclareVariables()
         {
             // int p
             p = il.DeclareLocal(typeof(int));
@@ -101,22 +101,22 @@ namespace BrainfuckSharp
             AddZeroToCells();
         }
 
-        private void IncrementPointer(int increase)
+        private static void IncrementPointer(int increase)
         {
             // load the variable from the stack.
-            this.il.Emit(OpCodes.Ldloc, p);
+            il.Emit(OpCodes.Ldloc, p);
 
             //push increase onto the stack as a in32
-            this.il.Emit(OpCodes.Ldc_I4, increase);
+            il.Emit(OpCodes.Ldc_I4, increase);
 
             // the two values.
-            this.il.Emit(OpCodes.Add);
+            il.Emit(OpCodes.Add);
 
             // pop the current value on the stack as local variable to p.
-            this.il.Emit(OpCodes.Stloc, p);
+            il.Emit(OpCodes.Stloc, p);
         }
 
-        private void IncrementAtPointer(int increase)
+        private static void IncrementAtPointer(int increase)
         {
             il.Emit(OpCodes.Ldloc, cells);
             il.Emit(OpCodes.Ldloc, p);
@@ -142,7 +142,7 @@ namespace BrainfuckSharp
 
         }
 
-        private void IncreaseSizeIfNecessary()
+        private static void IncreaseSizeIfNecessary()
         {
             Label incrementPointerLabel = il.DefineLabel();
 
@@ -172,7 +172,7 @@ namespace BrainfuckSharp
             il.MarkLabel(incrementPointerLabel);
         }
 
-        private void GenBlock(Block block)
+        private static void GenBlock(Block block)
         {
             foreach (Statement statement in block.Statements)
             {

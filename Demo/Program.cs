@@ -10,7 +10,7 @@ namespace Demo
             string code = @"++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.";
             Scanner scanner = new Scanner(new StringReader(code));
             Parser parser = new Parser(scanner.Tokens);
-            CodeGen codeGen = new CodeGen(parser.Result, "HelloWorld.exe");
+            CodeGen.CompileBlock(parser.Result, "HelloWorld.exe");
         }
     }
 }
