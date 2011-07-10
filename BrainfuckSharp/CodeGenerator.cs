@@ -52,11 +52,10 @@ namespace BrainfuckSharp
 
             il = mainMethod.GetILGenerator();
 
-            // Declare the necessary variables.
             DeclareVariables();
 
             // Actually compile the code.
-            GenBlock(block);
+            CompileBlock(block);
 
             // Return from the main function.
             il.Emit(OpCodes.Ret);
@@ -74,7 +73,7 @@ namespace BrainfuckSharp
             assembly.Save(moduleName);
         }
 
-        private static void GenBlock(Block block)
+        private static void CompileBlock(Block block)
         {
             // generate the code for every statement.
             foreach (Statement statement in block.Statements)
@@ -85,18 +84,14 @@ namespace BrainfuckSharp
                     switch (command.CommandType)
                     {
                         case CommandType.IncrementPointer:
-
                             IncreaseSizeIfNecessary();
                             IncrementPointer(1);
-                            // increase size.
                             break;
                         case CommandType.DecrementPointer:
-                            IncrementPointer(-1);
+                            DecrementPointer(1);
                             break;
                         case CommandType.OutputCharacter:
-
                             OutputCharacter();
-
                             break;
                         case CommandType.IncrementAtPointer:
                             IncrementAtPointer(1);
@@ -117,7 +112,7 @@ namespace BrainfuckSharp
 
                     // bodyLabel:
                     il.MarkLabel(bodyLabel);
-                    GenBlock(loop.Body);
+                    CompileBlock(loop.Body);
 
                     // testLabel: make the test.
                     il.MarkLabel(testLabel);
@@ -195,19 +190,24 @@ namespace BrainfuckSharp
             AddZeroToCells();
         }
 
+        // p += increase
         private static void IncrementPointer(int increase)
         {
-            // load the variable from the stack.
-            EmitUtility.LoadLocal(il,p);
+            ChangePointer(OpCodes.Add,increase);
+        }
 
-            //push increase onto the stack as a in32
-            EmitUtility.LoadInt32(il,increase);
+        // p += increase
+        private static void DecrementPointer(int decrease)
+        {
+            ChangePointer(OpCodes.Sub, decrease);
+        }
 
-            // the two values.
-            il.Emit(OpCodes.Add);
-
-            // pop the current value on the stack as local variable to p.
-            il.Emit(OpCodes.Stloc, p);
+        private static void ChangePointer(OpCode operation,int change)
+        {
+            EmitUtility.LoadLocal(il, p);
+            EmitUtility.LoadInt32(il, change);
+            il.Emit(operation);
+            EmitUtility.StoreLocal(il, p);
         }
 
         // ++cells[p];

@@ -9,14 +9,14 @@ namespace BrainfuckSharp
     /// Source:
     /// http://www.java2s.com/Open-Source/CSharp/Database/NBearLite/NBearLite/Emit/EmitUtils.cs.htm
     /// </summary>
-    public static class EmitUtility
+    internal static class EmitUtility
     {
         /// <summary>
         /// Pushes an integer onto the stack.
         /// </summary>
         /// <param name="gen">The IL generator to use.</param>
         /// <param name="value">The integer to push onto the stack.</param>
-        public static void LoadInt32(ILGenerator gen, int value)
+        internal static void LoadInt32(ILGenerator gen, int value)
         {
             if (gen == null)
                 throw new ArgumentNullException("gen");
@@ -70,7 +70,7 @@ namespace BrainfuckSharp
         /// <param name="index">
         /// The index to the store the popped value at.
         /// </param>
-        public static void StoreLocal(ILGenerator gen, int index)
+        internal static void StoreLocal(ILGenerator gen, int index)
         {
             if (gen == null)
                 throw new ArgumentNullException("gen");
@@ -99,13 +99,26 @@ namespace BrainfuckSharp
         }
 
         /// <summary>
+        /// Pops the current value from the stack and stores in the local 
+        /// variable.
+        /// </summary>
+        /// <param name="gen">The IL generator to use.</param>
+        /// <param name="local">
+        /// The variable to store the popped value in.
+        /// </param>
+        internal static void StoreLocal(ILGenerator gen, LocalBuilder local)
+        {
+            StoreLocal(gen, local.LocalIndex);
+        }
+
+        /// <summary>
         /// Load a variable onto the stack.
         /// </summary>
         /// <param name="gen">The IL generator to use.</param>
         /// <param name="local">
         /// The variable to load.
         /// </param>
-        public static void LoadLocal(ILGenerator gen, LocalBuilder local)
+        internal static void LoadLocal(ILGenerator gen, LocalBuilder local)
         {
             LoadLocal(gen, local.LocalIndex);
         }
@@ -117,7 +130,7 @@ namespace BrainfuckSharp
         /// <param name="index">
         /// The index to load the variable from.
         /// </param>
-        public static void LoadLocal(ILGenerator gen, int index)
+        internal static void LoadLocal(ILGenerator gen, int index)
         {
             if (gen == null)
                 throw new ArgumentNullException("gen");
