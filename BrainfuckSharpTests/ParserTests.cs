@@ -57,7 +57,7 @@ namespace BrainfuckSharpTests
 
             result.Statements.Add(loop);
 
-            Assert.AreEqual(result,Parser.ParseTokens(Scanner.Scan(input)));
+            Assert.AreEqual(result,Parser.ParseTokens(input));
         }
     }
 }

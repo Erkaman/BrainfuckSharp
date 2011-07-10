@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using BrainfuckSharp.AbstractSyntaxTree;
+using System.IO;
 
 namespace BrainfuckSharp
 {
@@ -9,11 +10,47 @@ namespace BrainfuckSharp
     /// Parses the tokens of Brainfuck source code.
     /// </summary>
     public static class Parser
-    {
+    {                
+        /// <summary>
+        /// Parses the input into an abstract syntax tree.
+        /// </summary>
+        /// <param name="input">The input to parse.</param>
+        /// <returns>
+        /// The abstract syntax tree parsed from the input.
+        /// </returns>
+        public static Block ParseTokens(TextReader input)
+        {
+            return ParseTokens(Scanner.Scan(input));
+        }
+
+        /// <summary>
+        /// Parses the stream into an abstract syntax tree.
+        /// </summary>
+        /// <param name="stream">The stream to parse.</param>
+        /// <returns>
+        /// The abstract syntax tree parsed from the stream.
+        /// </returns>
+        public static Block ParseTokens(Stream stream)
+        {
+            return ParseTokens(Scanner.Scan(stream));
+        }
+
+        /// <summary>
+        /// Parses the contents of a file into an abstract syntax tree.
+        /// </summary>
+        /// <param name="file">The file to parse.</param>
+        /// <returns>
+        /// The abstract syntax tree parsed from the contents of the file.
+        /// </returns>
+        public static Block ParseTokens(string file)
+        {
+            return ParseTokens(Scanner.Scan(file));
+        }
+
         /// <summary>
         /// Parses the tokens into an abstract syntax tree.
         /// </summary>
-        /// <param name="tokens">The tokens to parsw.</param>
+        /// <param name="tokens">The tokens to parse.</param>
         /// <returns>
         /// The abstract syntax tree parsed from the tokens.
         /// </returns>

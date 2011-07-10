@@ -11,8 +11,8 @@ namespace Demo
             string code = @"
 ++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+
 ++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.";
-            IList<char> tokens = Scanner.Scan(new StringReader(code));
-            CodeGenerator.CompileBlock(Parser.ParseTokens(tokens), "HelloWorld.exe");
+            //IList<char> tokens = Scanner.Scan(new StringReader(code));
+            CodeGenerator.CompileBlock(Parser.ParseTokens(new StringReader(code)), "HelloWorld.exe");
         }
     }
 }
