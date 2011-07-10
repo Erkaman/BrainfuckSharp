@@ -10,14 +10,16 @@ namespace BrainfuckSharp
     /// <summary>
     /// Generates the code of the compiler.
     /// </summary>
-    public static class CodeGen
+    public static class CodeGenerator
     {
         private static ILGenerator il;
+
         private static LocalBuilder p;
         private static LocalBuilder cells;
+        private static LocalBuilder temp;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CodeGen"/> class.
+        /// Initializes a new instance of the <see cref="CodeGenerator"/> class.
         /// </summary>
         /// <param name="block">The block of code to compile.</param>
         /// <param name="moduleName">
@@ -48,7 +50,6 @@ namespace BrainfuckSharp
                 typeof(void),
                 Type.EmptyTypes);
 
-            // get the IL generator.
             il = mainMethod.GetILGenerator();
 
             // Declare the necessary variables.
@@ -94,16 +95,7 @@ namespace BrainfuckSharp
                             break;
                         case CommandType.OutputCharacter:
 
-                            il.Emit(OpCodes.Ldloc, cells);
-                            il.Emit(OpCodes.Ldloc, p);
-
-                            il.Emit(OpCodes.Call,
-                                typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) })
-                                );
-
-                            il.Emit(
-                                OpCodes.Call,
-                                typeof(System.Console).GetMethod("Write", new System.Type[] { typeof(byte) }));
+                            OutputCharacter();
 
                             break;
                         case CommandType.IncrementAtPointer:
@@ -157,14 +149,28 @@ namespace BrainfuckSharp
 
         #region Private helpers
 
+        private static void OutputCharacter()
+        {
+            EmitUtility.LoadLocal(il, cells);
+            EmitUtility.LoadLocal(il, p);
+
+            il.Emit(OpCodes.Call,
+                typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) })
+                );
+
+            il.Emit(
+                OpCodes.Call,
+                typeof(System.Console).GetMethod("Write", new System.Type[] { typeof(byte) }));
+        }
+
         /// <summary>
         /// Add a new cell containing zero to the list of the cells.
         /// </summary>
         private static void AddZeroToCells()
         {
             // cells.Add(0);
-            il.Emit(OpCodes.Ldloc, cells);
-            il.Emit(OpCodes.Ldc_I4_0);
+            EmitUtility.LoadLocal(il, cells);
+            EmitUtility.LoadInt32(il, 0);
             il.Emit(OpCodes.Call,
                 typeof(List<byte>).GetMethod("Add", new System.Type[] { typeof(byte) })
                 );
@@ -182,16 +188,20 @@ namespace BrainfuckSharp
                 typeof(List<byte>).GetConstructor(Type.EmptyTypes));
             il.Emit(OpCodes.Stloc, cells);
 
+            // temporary variable used in additions and subtractions.
+            temp = il.DeclareLocal(typeof(byte));
+
+
             AddZeroToCells();
         }
 
         private static void IncrementPointer(int increase)
         {
             // load the variable from the stack.
-            il.Emit(OpCodes.Ldloc, p);
+            EmitUtility.LoadLocal(il,p);
 
             //push increase onto the stack as a in32
-            il.Emit(OpCodes.Ldc_I4, increase);
+            EmitUtility.LoadInt32(il,increase);
 
             // the two values.
             il.Emit(OpCodes.Add);
@@ -200,30 +210,30 @@ namespace BrainfuckSharp
             il.Emit(OpCodes.Stloc, p);
         }
 
+        // ++cells[p];
         private static void IncrementAtPointer(int increase)
         {
-            il.Emit(OpCodes.Ldloc, cells);
-            il.Emit(OpCodes.Ldloc, p);
-
+            // get cells[p]
+            EmitUtility.LoadLocal(il, cells);
+            EmitUtility.LoadLocal(il, p);
             il.Emit(OpCodes.Call,
                 typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) })
                 );
 
-            il.Emit(OpCodes.Ldc_I4, increase);
+            // increase + cells[p]
+            EmitUtility.LoadInt32(il, increase);
             il.Emit(OpCodes.Add);
-            il.Emit(OpCodes.Conv_I1);
 
-            LocalBuilder temp = il.DeclareLocal(typeof(byte));
+            // temp = increase + cells[p]
             il.Emit(OpCodes.Stloc, temp);
-
+            
+            // cells[p] = temp
             il.Emit(OpCodes.Ldloc, cells);
             il.Emit(OpCodes.Ldloc, p);
             il.Emit(OpCodes.Ldloc, temp);
-
             il.Emit(OpCodes.Call,
                 typeof(List<byte>).GetMethod("set_Item", new System.Type[] { typeof(int), typeof(byte) })
                 );
-
         }
 
         private static void IncreaseSizeIfNecessary()

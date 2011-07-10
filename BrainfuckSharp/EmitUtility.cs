@@ -99,6 +99,18 @@ namespace BrainfuckSharp
         }
 
         /// <summary>
+        /// Load a variable onto the stack.
+        /// </summary>
+        /// <param name="gen">The IL generator to use.</param>
+        /// <param name="local">
+        /// The variable to load.
+        /// </param>
+        public static void LoadLocal(ILGenerator gen, LocalBuilder local)
+        {
+            LoadLocal(gen, local.LocalIndex);
+        }
+
+        /// <summary>
         /// Load a variable onto the stack from the specfied index.
         /// </summary>
         /// <param name="gen">The IL generator to use.</param>
