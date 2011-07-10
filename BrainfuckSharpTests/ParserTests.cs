@@ -17,8 +17,6 @@ namespace BrainfuckSharpTests
 
             StringReader input = new StringReader(test);
 
-            Parser parser = new Parser(Scanner.Scan(input) );
-
             Block result = new Block();
             result.Statements = new List<Statement>();
             Action<CommandType> AddCommand = type =>
@@ -59,7 +57,7 @@ namespace BrainfuckSharpTests
 
             result.Statements.Add(loop);
 
-            Assert.AreEqual(result,parser.Result);
+            Assert.AreEqual(result,Parser.ParseTokens(Scanner.Scan(input)));
         }
     }
 }

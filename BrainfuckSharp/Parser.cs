@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Text;
 using System;
 using System.Linq;
 using BrainfuckSharp.AbstractSyntaxTree;
@@ -9,30 +8,16 @@ namespace BrainfuckSharp
     /// <summary>
     /// Parses the tokens of Brainfuck source code.
     /// </summary>
-    public sealed class Parser
+    public static class Parser
     {
-        private IList<char> tokens;
-        private readonly Block result;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="Parser"/> class.
+        /// Parses the tokens into an abstract syntax tree.
         /// </summary>
-        /// <param name="tokens">The tokens to parse.</param>
-        public Parser(IList<char> tokens)
-        {
-            this.tokens = tokens;
-            this.result = ParseTokens(this.tokens);
-        }
-
-        /// <summary>
-        /// Gets the result.
-        /// </summary>
-        public Block Result
-        {
-            get { return result; }
-        }
-
-        private static Block ParseTokens(IList<char> tokens)
+        /// <param name="tokens">The tokens to parsw.</param>
+        /// <returns>
+        /// The abstract syntax tree parsed from the tokens.
+        /// </returns>
+        public static Block ParseTokens(IList<char> tokens)
         {
             Block result = new Block();
             result.Statements = new List<Statement>();

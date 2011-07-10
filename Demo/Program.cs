@@ -12,8 +12,7 @@ namespace Demo
 ++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+
 ++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.";
             IList<char> tokens = Scanner.Scan(new StringReader(code));
-            Parser parser = new Parser(tokens);
-            CodeGenerator.CompileBlock(parser.Result, "HelloWorld.exe");
+            CodeGenerator.CompileBlock(Parser.ParseTokens(tokens), "HelloWorld.exe");
         }
     }
 }

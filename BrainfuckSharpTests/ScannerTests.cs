@@ -24,9 +24,6 @@ k ,
             };
 
             StringReader input = new StringReader(test);
-
-            // scanner = new Scanner(input);
-
             Assert.AreEqual(expected, Scanner.Scan(input));
         }
     }
