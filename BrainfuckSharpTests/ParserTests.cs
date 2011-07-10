@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using BrainfuckSharp;
+using BrainfuckSharpLibrary;
 using NUnit.Framework;
 using System.IO;
 using System;
-using BrainfuckSharp.AbstractSyntaxTree;
+using BrainfuckSharpLibrary.AbstractSyntaxTree;
 
 namespace BrainfuckSharpTests
 {

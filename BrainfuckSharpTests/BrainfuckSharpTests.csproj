@@ -43,9 +43,9 @@
     <Compile Include="ParserTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BrainfuckSharp\BrainfuckSharp.csproj">
+    <ProjectReference Include="..\BrainfuckSharpLibrary\BrainfuckSharpLibrary.csproj">
       <Project>{A2AEA52B-2A82-4BA4-B0C3-0FE8426C6D21}</Project>
-      <Name>BrainfuckSharp</Name>
+      <Name>BrainfuckSharpLibrary</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
