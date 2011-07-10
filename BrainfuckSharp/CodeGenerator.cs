@@ -183,9 +183,6 @@ namespace BrainfuckSharp
             AssignAtPointer(temp);
         }
 
-        /// <summary>
-        /// Add a new cell containing zero to the list of the cells.
-        /// </summary>
         private static void AddZeroToCells()
         {
             // cells.Add(0);

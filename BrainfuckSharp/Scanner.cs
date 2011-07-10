@@ -6,31 +6,10 @@ namespace BrainfuckSharp
     /// <summary>
     /// Scans the code the tokens.
     /// </summary>
-    public class Scanner
+    public static class Scanner
     {
-        readonly IList<char> tokens;
-
-        /// <summary>
-        /// Gets or sets the tokens of the code.
-        /// </summary>
-        /// <value>
-        /// The tokens of the code.
-        /// </value>
-        public IList<char> Tokens 
+        static Scanner()
         {
-            get
-            {
-                return tokens;
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Scanner"/> class.
-        /// </summary>
-        /// <param name="input">The input to scan the tokens from.</param>
-        public Scanner(TextReader input)
-        {
-            tokens = new List<char>();
             symbols = new List<char>()
             {
                 '<',
@@ -42,22 +21,49 @@ namespace BrainfuckSharp
                 '[',
                 ']'
             };
-            Scan(input);
         }
 
-        private List<char> symbols;
+        private static List<char> symbols;
 
-        private void Scan(TextReader input)
+        /// <summary>
+        /// Scans the file for the tokens of the Brainfuck language.
+        /// </summary>
+        /// <param name="file">The file to scan.</param>
+        /// <returns>The tokens of the string.</returns>
+        public static IList<char> Scan(string file)
         {
+            using (Stream stream = new FileStream(file,FileMode.Open))
+            {
+                return Scan(stream);
+            }
+        }
+
+        /// <summary>
+        /// Scans the stream for the tokens of the Brainfuck language.
+        /// </summary>
+        /// <param name="stream">The stream to scan.</param>
+        /// <returns>The tokens of the stream.</returns>
+        public static IList<char> Scan(Stream stream)
+        {
+            return Scan(new StreamReader(stream));
+        }
+
+        /// <summary>
+        /// Scans the input for the tokens of the Brainfuck language.
+        /// </summary>
+        /// <param name="input">The input to scan.</param>
+        /// <returns>The tokens of the input.</returns>
+        public static IList<char> Scan(TextReader input)
+        {
+            List<char> tokens = new List<char>();
             while (input.Peek() != -1)
             {
                 char ch = (char)input.Read();
 
-                // The item is a token if and only if it is a character in the 
-                // syntax of Brainfuck.
                 if (symbols.Contains(ch))
                     tokens.Add(ch);
             }
+            return tokens;
         }
 
     }

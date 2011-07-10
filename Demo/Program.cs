@@ -1,5 +1,6 @@
 ﻿using BrainfuckSharp;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Demo
 {
@@ -7,9 +8,11 @@ namespace Demo
     {
         static void Main(string[] args)
         {
-            string code = @">>>>>>>>>>>>>>>>>>++++++++++++++++++++++++++++++++++++++++++++++++++++++++.";
-            Scanner scanner = new Scanner(new StringReader(code));
-            Parser parser = new Parser(scanner.Tokens);
+            string code = @"
+++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+
+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.";
+            IList<char> tokens = Scanner.Scan(new StringReader(code));
+            Parser parser = new Parser(tokens);
             CodeGenerator.CompileBlock(parser.Result, "HelloWorld.exe");
         }
     }

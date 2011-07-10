@@ -17,8 +17,7 @@ namespace BrainfuckSharpTests
 
             StringReader input = new StringReader(test);
 
-            Scanner scanner = new Scanner(input);
-            Parser parser = new Parser(scanner.Tokens);
+            Parser parser = new Parser(Scanner.Scan(input) );
 
             Block result = new Block();
             result.Statements = new List<Statement>();

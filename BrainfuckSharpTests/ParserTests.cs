@@ -25,9 +25,9 @@ k ,
 
             StringReader input = new StringReader(test);
 
-            Scanner scanner = new Scanner(input);
+            // scanner = new Scanner(input);
 
-            Assert.AreEqual(expected, scanner.Tokens);
+            Assert.AreEqual(expected, Scanner.Scan(input));
         }
     }
 }
