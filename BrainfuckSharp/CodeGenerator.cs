@@ -87,6 +87,9 @@ namespace BrainfuckSharp
                         case CommandType.OutputCharacter:
                             OutputCharacter();
                             break;
+                        case CommandType.InputCharacter:
+                            InputCharacter();
+                            break;
                         case CommandType.IncrementAtPointer:
                             IncrementAtPointer(1);
                             break;
@@ -124,7 +127,7 @@ namespace BrainfuckSharp
             EmitUtility.LoadLocal(il, cells);
             EmitUtility.LoadLocal(il, p);
             il.Emit(OpCodes.Call,
-                typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) }));
+                typeof(List<byte>).GetMethod("get_Item", new Type[] { typeof(int) }));
 
             EmitUtility.LoadInt32(il, 0);
 
@@ -141,12 +144,30 @@ namespace BrainfuckSharp
             EmitUtility.LoadLocal(il, p);
 
             il.Emit(OpCodes.Call,
-                typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) })
+                typeof(List<byte>).GetMethod("get_Item", new Type[] { typeof(int) })
                 );
 
             il.Emit(
                 OpCodes.Call,
-                typeof(Console).GetMethod("Write", new System.Type[] { typeof(byte) }));
+                typeof(Console).GetMethod("Write", new Type[] { typeof(byte) }));
+        }
+
+        // cells[p] = (byte) input.Read();
+        private static void InputCharacter()
+        {
+            il.Emit(OpCodes.Call,
+                typeof(Console).GetMethod("Read", Type.EmptyTypes));
+
+            EmitUtility.StoreLocal(il, temp);
+
+            AssignAtPointer(temp);
+
+            /*EmitUtility.LoadLocal(il, cells);
+            EmitUtility.LoadLocal(il, p);
+            EmitUtility.LoadLocal(il, temp);
+            il.Emit(
+                OpCodes.Call,
+                typeof(Console).GetMethod("set_Item", new Type[] { typeof(byte) }));*/
         }
 
         /// <summary>
@@ -158,7 +179,7 @@ namespace BrainfuckSharp
             EmitUtility.LoadLocal(il, cells);
             EmitUtility.LoadInt32(il, 0);
             il.Emit(OpCodes.Call,
-                typeof(List<byte>).GetMethod("Add", new System.Type[] { typeof(byte) })
+                typeof(List<byte>).GetMethod("Add", new Type[] { typeof(byte) })
                 );
         }
 
@@ -219,7 +240,7 @@ namespace BrainfuckSharp
             EmitUtility.LoadLocal(il, cells);
             EmitUtility.LoadLocal(il, p);
             il.Emit(OpCodes.Call,
-                typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) })
+                typeof(List<byte>).GetMethod("get_Item", new Type[] { typeof(int) })
                 );
 
             // increase op cells[p]
@@ -230,11 +251,17 @@ namespace BrainfuckSharp
             il.Emit(OpCodes.Stloc, temp);
 
             // cells[p] = temp
+            AssignAtPointer(temp);
+        }
+
+        private static void AssignAtPointer(LocalBuilder assignment)
+        {
+            // cells[p] = assignment
             il.Emit(OpCodes.Ldloc, cells);
             il.Emit(OpCodes.Ldloc, p);
-            il.Emit(OpCodes.Ldloc, temp);
+            il.Emit(OpCodes.Ldloc, assignment);
             il.Emit(OpCodes.Call,
-                typeof(List<byte>).GetMethod("set_Item", new System.Type[] { typeof(int), typeof(byte) })
+                typeof(List<byte>).GetMethod("set_Item", new Type[] { typeof(int), typeof(byte) })
                 );
         }
 
