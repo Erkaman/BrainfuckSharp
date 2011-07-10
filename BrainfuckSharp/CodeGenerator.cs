@@ -20,27 +20,27 @@ namespace BrainfuckSharp
         private static LocalBuilder temp;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CodeGenerator"/> class.
+        /// Compiles a block code to a file.
         /// </summary>
         /// <param name="block">The block of code to compile.</param>
-        /// <param name="moduleName">
-        /// The name of the compiled assembly.
+        /// <param name="compiledFile">
+        /// The name of the compiled file.
         /// </param>
-        public static void CompileBlock(Block block, string moduleName)
+        public static void CompileBlock(Block block, string compiledFile)
         {
-            if (Path.GetFileName(moduleName) != moduleName)
+            if (Path.GetFileName(compiledFile) != compiledFile)
                 throw new Exception("can only output into current directory!");
 
             AssemblyName assemblyName = new AssemblyName(
-                Path.GetFileNameWithoutExtension(moduleName));
+                Path.GetFileNameWithoutExtension(compiledFile));
 
             AssemblyBuilder assembly =
                 AppDomain.CurrentDomain.DefineDynamicAssembly(
                 assemblyName,
                 AssemblyBuilderAccess.Save);
 
-            ModuleBuilder moduleBuilder = 
-                assembly.DefineDynamicModule(moduleName);
+            ModuleBuilder moduleBuilder =
+                assembly.DefineDynamicModule(compiledFile);
             TypeBuilder programType = moduleBuilder.DefineType("Program");
 
             MethodBuilder mainMethod =
@@ -65,7 +65,43 @@ namespace BrainfuckSharp
             moduleBuilder.CreateGlobalFunctions();
 
             assembly.SetEntryPoint(mainMethod);
-            assembly.Save(moduleName);
+            assembly.Save(compiledFile);
+        }
+
+        /// <summary>
+        /// Compiles a source file an output to file.
+        /// </summary>
+        /// <param name="file">The source file to compile.</param>
+        /// <param name="compiledFile">
+        /// The name of the compiled file.
+        /// </param>
+        public static void CompileFile(string file, string compiledFile)
+        {
+            CompileBlock(Parser.ParseTokens(file), compiledFile);
+        }
+
+        /// <summary>
+        /// Compiles a TextReader to a file.
+        /// </summary>
+        /// <param name="input">The input to compile.</param>
+        /// <param name="compiledFile">
+        /// The name of the compiled file.
+        /// </param>
+        public static void CompileTextReader(TextReader input, string compiledFile)
+        {
+            CompileBlock(Parser.ParseTokens(input), compiledFile);
+        }
+
+        /// <summary>
+        /// Compiles a stream to a file.
+        /// </summary>
+        /// <param name="stream">The stream to compile.</param>
+        /// <param name="compiledFile">
+        /// The name of the compiled file.
+        /// </param>
+        public static void CompileStream(Stream stream, string compiledFile)
+        {
+            CompileBlock(Parser.ParseTokens(stream), compiledFile);
         }
 
         static int repetitions = 1;

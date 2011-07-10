@@ -1,6 +1,6 @@
-﻿using System.Reflection.Emit;
-using System;
+﻿using System;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace BrainfuckSharp
 {
