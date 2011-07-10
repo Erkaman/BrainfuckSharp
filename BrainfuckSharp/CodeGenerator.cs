@@ -97,36 +97,7 @@ namespace BrainfuckSharp
                 }
                 else if (statement is Loop)
                 {
-                    Loop loop = (Loop)statement;
-                    Label testLabel = il.DefineLabel();
-                    Label bodyLabel = il.DefineLabel();
-
-                    // go to testLabel and make the while loop test
-                    il.Emit(OpCodes.Br, testLabel);
-
-                    // bodyLabel:
-                    il.MarkLabel(bodyLabel);
-                    CompileBlock(loop.Body);
-
-                    // testLabel: make the test.
-                    il.MarkLabel(testLabel);
-
-                    il.Emit(OpCodes.Ldloc, cells);
-                    il.Emit(OpCodes.Ldloc, p);
-
-                    il.Emit(OpCodes.Call,
-                        typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) }));
-
-                    il.Emit(OpCodes.Ldc_I4_0);
-                    il.Emit(OpCodes.Ceq);
-                    il.Emit(OpCodes.Ldc_I4_0);
-                    il.Emit(OpCodes.Ceq);
-                    LocalBuilder temp = il.DeclareLocal(typeof(int));
-                    il.Emit(OpCodes.Stloc, temp);
-                    il.Emit(OpCodes.Ldloc, temp);
-                    il.Emit(OpCodes.Brtrue, bodyLabel);
-
-                    // if the test is true go to label bodyLabel. else do nothing.
+                    CompileLoop((Loop)statement);
                 }
                 else
                     throw new Exception(
@@ -134,7 +105,35 @@ namespace BrainfuckSharp
             }
         }
 
-        #region Private helpers
+        private static void CompileLoop(Loop loop)
+        {
+            Label testLabel = il.DefineLabel();
+            Label bodyLabel = il.DefineLabel();
+
+            //  Go and make the test first.
+            il.Emit(OpCodes.Br, testLabel);
+
+            // The body of the loop.
+            il.MarkLabel(bodyLabel);
+            CompileBlock(loop.Body);
+
+            // Make the test of the loop.
+            il.MarkLabel(testLabel);
+
+            // cells[p]
+            EmitUtility.LoadLocal(il, cells);
+            EmitUtility.LoadLocal(il, p);
+            il.Emit(OpCodes.Call,
+                typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) }));
+
+            EmitUtility.LoadInt32(il, 0);
+
+            // while(cells[p] != 0)
+            il.Emit(OpCodes.Ceq);
+            il.Emit(OpCodes.Brfalse, bodyLabel);
+
+            // if the test is true go to label bodyLabel; else do nothing.
+        }
 
         private static void OutputCharacter()
         {
@@ -262,7 +261,5 @@ namespace BrainfuckSharp
 
             il.MarkLabel(incrementPointerLabel);
         }
-
-        #endregion
     }
 }
