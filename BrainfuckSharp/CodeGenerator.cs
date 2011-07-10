@@ -241,23 +241,18 @@ namespace BrainfuckSharp
             Label incrementPointerLabel = il.DefineLabel();
 
             // (p + 1 );
-            il.Emit(OpCodes.Ldloc, p);
-            il.Emit(OpCodes.Ldc_I4_1);
+            EmitUtility.LoadLocal(il, p);
+            EmitUtility.LoadInt32(il, 1);
             il.Emit(OpCodes.Add);
 
             // cells.Count;
-            il.Emit(OpCodes.Ldloc, cells);
+            EmitUtility.LoadLocal(il, cells);
             il.Emit(OpCodes.Call,
                 typeof(List<byte>).GetMethod("get_Count", Type.EmptyTypes)
                 );
 
-            // bool b = (p + 1) == cells.Count;
+            // if (num + 1 == list.Count)
             il.Emit(OpCodes.Ceq);
-
-            LocalBuilder temp = il.DeclareLocal(typeof(bool));
-            il.Emit(OpCodes.Stloc, temp);
-            il.Emit(OpCodes.Ldloc, temp);
-
             il.Emit(OpCodes.Brfalse_S, incrementPointerLabel);
 
             // increase the size by one.
