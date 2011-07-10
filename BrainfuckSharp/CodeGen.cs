@@ -23,10 +23,6 @@ namespace BrainfuckSharp
         /// <param name="moduleName">The name of the compiled assembly..</param>
         public CodeGen(Block block, string moduleName)
         {
-            if (Path.GetFileName(moduleName) != moduleName)
-                throw new System.Exception(
-                    "can only output into current directory!");
-
             AssemblyName name = new AssemblyName(
                 Path.GetFileNameWithoutExtension(moduleName));
 
@@ -45,7 +41,6 @@ namespace BrainfuckSharp
                 typeof(void),
                 System.Type.EmptyTypes);
 
-            // CodeGenerator
             this.il = methb.GetILGenerator();
 
             DeclareVariables();
@@ -62,11 +57,14 @@ namespace BrainfuckSharp
             this.il = null;
         }
 
+        /// <summary>
+        /// Add a new cell containing zero to the list of the cells.
+        /// </summary>
         private void AddZeroToCells()
         {
+            // cells.Add(0);
             il.Emit(OpCodes.Ldloc, cells);
             il.Emit(OpCodes.Ldc_I4_0);
-
             il.Emit(OpCodes.Call,
                 typeof(List<byte>).GetMethod("Add", new System.Type[] { typeof(byte) })
                 );
@@ -74,9 +72,10 @@ namespace BrainfuckSharp
 
         private void DeclareVariables()
         {
+            // int p
             p = il.DeclareLocal(typeof(int));
 
-
+            // List<byte> cells = new List<byte>();
             cells = il.DeclareLocal(typeof(List<byte>));
             il.Emit(
                 OpCodes.Newobj,
@@ -127,6 +126,36 @@ namespace BrainfuckSharp
 
         }
 
+        private void IncreaseSizeIfNecessary()
+        {
+            Label incrementPointerLabel = il.DefineLabel();
+
+            // (p + 1 );
+            il.Emit(OpCodes.Ldloc, p);
+            il.Emit(OpCodes.Ldc_I4_1);
+            il.Emit(OpCodes.Add);
+
+            // cells.Count;
+            il.Emit(OpCodes.Ldloc, cells);
+            il.Emit(OpCodes.Call,
+                typeof(List<byte>).GetMethod("get_Count", Type.EmptyTypes)
+                );
+
+            // bool b = (p + 1) == cells.Count;
+            il.Emit(OpCodes.Ceq);
+
+            LocalBuilder temp = il.DeclareLocal(typeof(bool));
+            il.Emit(OpCodes.Stloc, temp);
+            il.Emit(OpCodes.Ldloc, temp);
+
+            il.Emit(OpCodes.Brfalse_S, incrementPointerLabel);
+
+            // increase the size by one.
+            AddZeroToCells();
+
+            il.MarkLabel(incrementPointerLabel);
+        }
+
         private void GenBlock(Block block)
         {
             foreach (Statement statement in block.Statements)
@@ -138,32 +167,7 @@ namespace BrainfuckSharp
                     {
                         case CommandType.IncrementPointer:
 
-                            Label incrementPointerLabel = il.DefineLabel();
-
-                            // (p + 1 );
-                            il.Emit(OpCodes.Ldloc, p);
-                            il.Emit(OpCodes.Ldc_I4_1);
-                            il.Emit(OpCodes.Add);
-
-                            // cells.Count;
-                            il.Emit(OpCodes.Ldloc, cells);
-                            il.Emit(OpCodes.Call,  
-                                typeof(List<byte>).GetMethod("get_Count", Type.EmptyTypes)
-                                );
-
-                            // bool b = (p + 1) == cells.Count;
-                            il.Emit(OpCodes.Ceq);
-
-                            LocalBuilder temp = il.DeclareLocal(typeof(bool));
-                            il.Emit(OpCodes.Stloc,temp);
-                            il.Emit(OpCodes.Ldloc,temp);
-
-                            il.Emit(OpCodes.Brfalse_S,incrementPointerLabel);
-
-                            // increase the size by one.
-                            AddZeroToCells();
-
-                            il.MarkLabel(incrementPointerLabel);
+                            IncreaseSizeIfNecessary();
                             IncrementPointer(1);
                             // increase size.
                             break;
@@ -208,31 +212,20 @@ namespace BrainfuckSharp
                     // testLabel: make the test.
                     il.MarkLabel(testLabel);
 
-                    il.Emit(OpCodes.Ldloc,cells);
-                    il.Emit(OpCodes.Ldloc,p);
+                    il.Emit(OpCodes.Ldloc, cells);
+                    il.Emit(OpCodes.Ldloc, p);
 
-                                il.Emit(OpCodes.Call,
-                typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) })
-                );
-  //IL_001b:  callvirt   instance !0 class [mscorlib]System.Collections.Generic.List`1<uint8>::get_Item(int32)
+                    il.Emit(OpCodes.Call,
+                        typeof(List<byte>).GetMethod("get_Item", new System.Type[] { typeof(int) }) );
 
                     il.Emit(OpCodes.Ldc_I4_0);
-  //IL_0020:  ldc.i4.0
                     il.Emit(OpCodes.Ceq);
- // IL_0021:  ceq
                     il.Emit(OpCodes.Ldc_I4_0);
-  //IL_0023:  ldc.i4.0
-  //IL_0024:  ceq
-      il.Emit(OpCodes.Ceq);
+                    il.Emit(OpCodes.Ceq);
                     LocalBuilder temp = il.DeclareLocal(typeof(int));
-                    il.Emit(OpCodes.Stloc,temp);
-                    il.Emit(OpCodes.Ldloc,temp);
-  /*IL_0026:  stloc.2
-  IL_0027:  ldloc.2*/
-                    il.Emit(OpCodes.Brtrue,bodyLabel);
-  //IL_0028:  brtrue.s   IL_0013
-
-
+                    il.Emit(OpCodes.Stloc, temp);
+                    il.Emit(OpCodes.Ldloc, temp);
+                    il.Emit(OpCodes.Brtrue, bodyLabel);
 
                     // if the test is true go to label bodyLabel. else do nothing.
                 }
