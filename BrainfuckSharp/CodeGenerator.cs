@@ -4,6 +4,7 @@ using BrainfuckSharp.AbstractSyntaxTree;
 using System.Reflection.Emit;
 using System.Reflection;
 using System.IO;
+using System.Linq;
 
 namespace BrainfuckSharp
 {
@@ -94,7 +95,9 @@ namespace BrainfuckSharp
                         switch (command.CommandType)
                         {
                             case CommandType.IncrementPointer:
-                                IncreaseSizeIfNecessary();
+                                //for (int j = 0; j < repetitions; ++j)
+                                //    AddZeroToCells();
+                                AccommodateSize();
                                 IncrementPointer(repetitions);
                                 break;
                             case CommandType.DecrementPointer:
@@ -275,28 +278,75 @@ namespace BrainfuckSharp
                 );
         }
 
-        private static void IncreaseSizeIfNecessary()
+        private static void AccommodateSize()
         {
             Label incrementPointerLabel = il.DefineLabel();
 
-            // (p + 1 );
-            EmitUtility.LoadLocal(il, p);
-            EmitUtility.LoadInt32(il, 1);
-            il.Emit(OpCodes.Add);
+            Action<int> PushValues = (i) =>
+            {
+                // (p +  repetitions);
+                EmitUtility.LoadLocal(il, p);
+                EmitUtility.LoadInt32(il, repetitions + i);
+                il.Emit(OpCodes.Add);
 
-            // cells.Count;
-            EmitUtility.LoadLocal(il, cells);
-            il.Emit(OpCodes.Call,
-                typeof(List<byte>).GetMethod("get_Count", Type.EmptyTypes)
-                );
+                // cells.Count;
+                EmitUtility.LoadLocal(il, cells);
+                il.Emit(OpCodes.Call,
+                    typeof(List<byte>).GetMethod("get_Count", Type.EmptyTypes)
+                    );
+            };
 
-            // if (num + 1 == list.Count)
-            il.Emit(OpCodes.Ceq);
-            il.Emit(OpCodes.Brfalse_S, incrementPointerLabel);
+            PushValues(0);
+            // if (p + repetitions >= list.Count)
+            il.Emit(OpCodes.Blt_S, incrementPointerLabel);
 
-            AddZeroToCells();
+            if (repetitions > 1)
+            {
+                // (p +v 1 + repetitions - list.Count)
+                PushValues(1);
+                il.Emit(OpCodes.Sub);
+                // store the number of cells to add.
+                EmitUtility.StoreLocal(il, temp);
+
+                RepeatAction(temp, AddZeroToCells);
+            }
+            else
+                AddZeroToCells();
 
             il.MarkLabel(incrementPointerLabel);
+        }
+
+        private static void RepeatAction(
+            LocalBuilder repetitions, 
+            Action action)
+        {
+            // for loop.
+            Label testLabel = il.DefineLabel();
+            Label bodyLabel = il.DefineLabel();
+
+            // initialization:
+            LocalBuilder i = il.DeclareLocal(typeof(int));
+            EmitUtility.LoadInt32(il, 0);
+            EmitUtility.StoreLocal(il, i);
+
+            il.Emit(OpCodes.Br, testLabel);
+
+            // body
+            il.MarkLabel(bodyLabel);
+            action();
+
+            // increment:
+            EmitUtility.LoadLocal(il, i);
+            EmitUtility.LoadInt32(il, 1);
+            il.Emit(OpCodes.Add);
+            EmitUtility.StoreLocal(il, i);
+
+            //test.
+            il.MarkLabel(testLabel);
+
+            EmitUtility.LoadLocal(il, i);
+            EmitUtility.LoadLocal(il, temp);
+            il.Emit(OpCodes.Blt, bodyLabel);
         }
     }
 }
