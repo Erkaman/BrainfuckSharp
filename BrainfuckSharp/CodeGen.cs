@@ -8,52 +8,68 @@ using System.IO;
 namespace BrainfuckSharp
 {
     /// <summary>
-    /// The code generator
+    /// Generates the code of the compiler.
     /// </summary>
     public sealed class CodeGen
     {
-        ILGenerator il = null;
-        LocalBuilder p;
-        LocalBuilder cells;
+        private ILGenerator il = null;
+        private LocalBuilder p;
+        private LocalBuilder cells;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CodeGen"/> class.
         /// </summary>
-        /// <param name="block">The block to compile.</param>
-        /// <param name="moduleName">The name of the compiled assembly..</param>
+        /// <param name="block">The block of code to compile.</param>
+        /// <param name="moduleName">
+        /// The name of the compiled assembly.
+        /// </param>
         public CodeGen(Block block, string moduleName)
         {
-            AssemblyName name = new AssemblyName(
-                Path.GetFileNameWithoutExtension(moduleName));
+            if (Path.GetFileName(moduleName) != moduleName)
+            {
+                throw new Exception("can only output into current directory!");
+            }
 
-            AssemblyBuilder asmb =
+            AssemblyName assemblyName = new AssemblyName(moduleName);
+
+            AssemblyBuilder assembly =
                 AppDomain.CurrentDomain.DefineDynamicAssembly(
-                name,
+                assemblyName,
                 AssemblyBuilderAccess.Save);
 
-            ModuleBuilder modb = asmb.DefineDynamicModule(moduleName);
-            TypeBuilder typeBuilder = modb.DefineType("Program");
+            ModuleBuilder moduleBuilder = assembly.DefineDynamicModule(moduleName);
+            TypeBuilder programType = moduleBuilder.DefineType("Program");
 
-            MethodBuilder methb =
-                typeBuilder.DefineMethod(
+            MethodBuilder mainMethod =
+                programType.DefineMethod(
                 "Main",
                 MethodAttributes.Static,
                 typeof(void),
-                System.Type.EmptyTypes);
+                Type.EmptyTypes);
 
-            this.il = methb.GetILGenerator();
+            // get the IL generator.
+            il = mainMethod.GetILGenerator();
 
+            // Declare the necessary variables.
             DeclareVariables();
 
             // Compile the code.
-            this.GenBlock(block);
+            GenBlock(block);
 
-            // return from the main function.
+            // Return from the main function.
             il.Emit(OpCodes.Ret);
-            typeBuilder.CreateType();
-            modb.CreateGlobalFunctions();
-            asmb.SetEntryPoint(methb);
-            asmb.Save(moduleName);
+
+            // Create the program type.
+            programType.CreateType();
+
+            // Create the main method.
+            moduleBuilder.CreateGlobalFunctions();
+
+            // Set the entrypoint to the main method.
+            assembly.SetEntryPoint(mainMethod);
+
+            // Save the module to the file.
+            assembly.Save(moduleName);
             this.il = null;
         }
 
