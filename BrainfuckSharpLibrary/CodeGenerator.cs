@@ -51,11 +51,7 @@ namespace BrainfuckSharpLibrary
 
             il = mainMethod.GetILGenerator();
 
-            DeclareVariables();
-            CompileBlock(block);
-
-            // Return from the main method
-            il.Emit(OpCodes.Ret);
+            EmitMainMethod(block);
 
             // Create the program type.
             programType.CreateType();
@@ -65,6 +61,27 @@ namespace BrainfuckSharpLibrary
 
             assembly.SetEntryPoint(mainMethod);
             assembly.Save(compiledFile);
+        }
+
+        private static void EmitMainMethod(Block block)
+        {
+            il.BeginExceptionBlock();
+
+            DeclareVariables();
+            CompileBlock(block);
+
+            il.BeginCatchBlock(typeof(ArgumentOutOfRangeException));
+
+            il.Emit(OpCodes.Ldstr, "Attempted to access negative data pointer");
+            il.Emit( 
+                OpCodes.Call,  
+                typeof(Console).GetMethod("WriteLine", new Type[] { typeof(string) }));
+
+            il.EndExceptionBlock();
+
+            // Return from the main method
+            il.Emit(OpCodes.Ret);
+
         }
 
         /// <summary>

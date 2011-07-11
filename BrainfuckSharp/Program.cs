@@ -1,6 +1,5 @@
 ﻿using BrainfuckSharpLibrary;
 using System;
-using System.IO;
 using NDesk.Options;
 using System.Collections.Generic;
 
@@ -23,19 +22,12 @@ Options:
         static void Main(string[] args)
         {
             bool showHelp = false;
-            bool inline = false;
 
             var options = new OptionSet()         
-            {                                      
-            {                
-                "i|inline",                             
-                "Compile an inline snippet.",                         
-                v => inline = v != null              
-                
-                },
-            
-                { "h|help",  "show this message and exit.", 
-              v => showHelp = v != null }  
+            {                                                             
+            { 
+                "h|help",  "show this message and exit.",              
+                v => showHelp = v != null }  
             };
 
             List<string> extra;
@@ -59,26 +51,12 @@ Options:
                 {
                     if (extra.Count > 0)
                     {
-                        if (inline)
-                        {
-                            if (extra.Count < 2)
-                                Console.WriteLine(
-                                    "Not enough arguments specified");
-                            else
-                                CodeGenerator.CompileTextReader(
-                                    new StringReader(extra[0]),
-                                    extra[1]);
-                        }
+                        if (extra.Count < 2)
+                            CodeGenerator.CompileFile(
+                                args[0],
+                                args[0] + ".exe");
                         else
-                        {
-                            if (extra.Count < 2)
-                                CodeGenerator.CompileFile(
-                                    args[0],
-                                    args[0] + ".exe");
-                            else
-                                CodeGenerator.CompileFile(args[0], args[1]);
-                        }
-
+                            CodeGenerator.CompileFile(args[0], args[1]);
                     }
                     else
                         Console.WriteLine("No files specified.");
