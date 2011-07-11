@@ -11,7 +11,7 @@ namespace BrainfuckSharpTests
     class ParserTests
     {
         [Test]
-        public void ConstructorTest()
+        public void ParseTokensTest()
         {
             string test = @"<>+-.[,+ [++] - ]";
 
@@ -58,6 +58,24 @@ namespace BrainfuckSharpTests
             result.Statements.Add(loop);
 
             Assert.AreEqual(result,Parser.ParseTokens(input));
+        }
+
+        [Test]
+        public void ParseTokensExceptionTest()
+        {
+            const string errorMessage = "Unbalanced brackets.";
+
+            Action<string> AssertThrowsException = (input) =>
+            {
+                Assert.That(() => Parser.ParseTokens(new StringReader(input)),
+                Throws.Exception.TypeOf<SyntaxErrorException>()
+                .With.Message.Contains(errorMessage));
+            };
+
+            AssertThrowsException("[");
+            AssertThrowsException("[]]");
+            AssertThrowsException("[[]][][]]");
+            AssertThrowsException("[[]");
         }
     }
 }
