@@ -1,0 +1,13 @@
+
+* What is this?
+
+A [[http://en.wikipedia.org/wiki/Brainfuck][Brainfuck]] compiler for the .NET platform.
+
+* How to use?
+
+#+BEGIN_EXAMPLE
+BrainfuckSharp sourcefile.bf outputfile.exe
+#+END_EXAMPLE
+
+To compile the Brainfuck source code of sourcefile.bf to the
+executable outputfile.exe
