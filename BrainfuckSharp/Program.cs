@@ -1,76 +1,82 @@
 ﻿using BrainfuckSharpLibrary;
 using System;
 using System.IO;
+using NDesk.Options;
+using System.Collections.Generic;
 
 namespace BrainfuckSharp
 {
     static class Program
     {
-        static void ShowOption(string option,string description)
+        static void ShowHelp(OptionSet options)
         {
-            Console.WriteLine("   {0}\t\t{1}",option,description);
-        }
+            string helpMessage =
+@"Usage: BrainfuckSharp [options] file [outputfile]
+Allows compiling brainfuck source files to executables
+Options:
 
-        static void ShowHelp()
-        {
-            Console.WriteLine("Usage: [options] file [outputfile]");
-            Console.WriteLine("Options:");
-            ShowOption("--help,-h", "Show this");
-            ShowOption("--inl,-i", "Compile an inline snippet to a file");
-            //ShowOption("--debug,-d", "Show debug information");
-
+";
+            Console.WriteLine(helpMessage);
+            options.WriteOptionDescriptions(Console.Out);
         }
 
         static void Main(string[] args)
         {
-            if (args.Length > 0)
-                if (args[0] == "--help" || args[0] == "-h")
-                    ShowHelp();
-                else if (args[0] == "--inl" || args[0] == "i")
+            bool showHelp = false;
+            bool inline = false;
+
+            var options = new OptionSet()         
+            {                                      
+            {                
+                "i|inline",                             
+                "Compile an inline snippet.",                         
+                v => inline = v != null              
+                
+                },
+            
+                { "h|help",  "show this message and exit.", 
+              v => showHelp = v != null }  
+            };
+
+            List<string> extra;
+            try
+            {
+                extra = options.Parse(args);
+            }
+            catch (OptionException e)
+            {
+                Console.Write("BrainfuckSharp: ");
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Try `BrainfuckSharp --help' for more information.");
+                return;
+            }
+
+            if (showHelp)
+                ShowHelp(options);
+            else
+            {
+                if (extra.Count > 0)
                 {
-                    bool passed = true;
-
-                    if (args[1] == null)
+                    if (inline)
                     {
-                        Console.WriteLine("No inline expression specified");
-                        passed = false;
+                        if (extra.Count < 2)
+                            Console.WriteLine("Not enough arguments specified");
+                        else
+                            CodeGenerator.CompileTextReader(
+                                new StringReader(extra[1]),
+                                extra[2]);
                     }
-
-
-                    if (args[2] == null)
-                    { 
-                        Console.WriteLine("No output file specified");
-                        passed = false;
-                    }
-
-                    if (passed)
+                    else
                     {
-                        CodeGenerator.CompileTextReader(
-                            new StringReader(args[1]),
-                            args[2]);
+                        if (extra.Count < 2)
+                            CodeGenerator.CompileFile(args[0], args[0] + ".exe");
+                        else
+                            CodeGenerator.CompileFile(args[0], args[1]);
                     }
                 }
                 else
-                {
-                    bool passed = true;
-                    string output = args[1];
-                    if (args[0] == null)
-                    {
-                        Console.WriteLine("No input file specified");
-                        passed = false;
-                    }
-
-                    if (args[1] == null)
-                    {
-                        Console.WriteLine("No output file specified");
-                        output = args[0] + ".exe";
-                    }
-
-                    if(passed)                  
-                        CodeGenerator.CompileFile(args[0],output );
-                }
-            else
-                Console.WriteLine("No files specified.");
+                    Console.WriteLine("No files specified.");
+            }
         }
     }
 }
