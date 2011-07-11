@@ -121,12 +121,13 @@ namespace BrainfuckSharpLibrary
                                 }
                             }
                             if (unmatchedBrackets != 0)
-                                throw new Exception("Unbalanced bracket");
-
+                                throw new SyntaxErrorException(
+                                    "Unbalanced brackets.");
                             break;
                         }
                     case ']':
-                        throw new Exception("Unbalanced bracket");
+                        throw new SyntaxErrorException(
+                            "Unbalanced brackets.");
                 }
             }
             return result;

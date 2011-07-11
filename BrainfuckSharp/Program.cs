@@ -55,27 +55,38 @@ Options:
                 ShowHelp(options);
             else
             {
-                if (extra.Count > 0)
+                try
                 {
-                    if (inline)
+                    if (extra.Count > 0)
                     {
-                        if (extra.Count < 2)
-                            Console.WriteLine("Not enough arguments specified");
+                        if (inline)
+                        {
+                            if (extra.Count < 2)
+                                Console.WriteLine(
+                                    "Not enough arguments specified");
+                            else
+                                CodeGenerator.CompileTextReader(
+                                    new StringReader(extra[0]),
+                                    extra[1]);
+                        }
                         else
-                            CodeGenerator.CompileTextReader(
-                                new StringReader(extra[1]),
-                                extra[2]);
+                        {
+                            if (extra.Count < 2)
+                                CodeGenerator.CompileFile(
+                                    args[0],
+                                    args[0] + ".exe");
+                            else
+                                CodeGenerator.CompileFile(args[0], args[1]);
+                        }
+
                     }
                     else
-                    {
-                        if (extra.Count < 2)
-                            CodeGenerator.CompileFile(args[0], args[0] + ".exe");
-                        else
-                            CodeGenerator.CompileFile(args[0], args[1]);
-                    }
+                        Console.WriteLine("No files specified.");
                 }
-                else
-                    Console.WriteLine("No files specified.");
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
             }
         }
     }

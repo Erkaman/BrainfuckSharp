@@ -14,7 +14,6 @@ namespace BrainfuckSharpLibrary
     public static class CodeGenerator
     {
         private static ILGenerator il;
-
         private static LocalBuilder p;
         private static LocalBuilder cells;
         private static LocalBuilder temp;
@@ -26,11 +25,11 @@ namespace BrainfuckSharpLibrary
         /// <param name="compiledFile">
         /// The name of the compiled file.
         /// </param>
+        /// <exception cref="System.NotSupportedException">
+        /// The code contained a statement unsupported by this parser.
+        /// </exception>
         public static void CompileBlock(Block block, string compiledFile)
         {
-            if (Path.GetFileName(compiledFile) != compiledFile)
-                throw new Exception("can only output into current directory!");
-
             AssemblyName assemblyName = new AssemblyName(
                 Path.GetFileNameWithoutExtension(compiledFile));
 
@@ -131,8 +130,6 @@ namespace BrainfuckSharpLibrary
                         switch (command.CommandType)
                         {
                             case CommandType.IncrementPointer:
-                                //for (int j = 0; j < repetitions; ++j)
-                                //    AddZeroToCells();
                                 AccommodateSize();
                                 IncrementPointer(repetitions);
                                 break;
@@ -160,8 +157,9 @@ namespace BrainfuckSharpLibrary
                     CompileLoop((Loop)statement);
                 }
                 else
-                    throw new Exception(
-                        "Don't know how to gen a " + statement.GetType().Name);
+                    throw new NotSupportedException(
+                        "Don't know how to generate code for a " + 
+                        statement.GetType().Name);
             }
         }
 
