@@ -2,6 +2,7 @@
 using System;
 using NDesk.Options;
 using System.Collections.Generic;
+using System.IO;
 
 namespace BrainfuckSharp
 {
@@ -53,8 +54,8 @@ Options:
                     {
                         if (extra.Count < 2)
                             CodeGenerator.CompileFile(
-                                args[0],
-                                args[0] + ".exe");
+                                args[0],                          
+                                Path.GetFileNameWithoutExtension(args[0]) + ".exe");
                         else
                             CodeGenerator.CompileFile(args[0], args[1]);
                     }
