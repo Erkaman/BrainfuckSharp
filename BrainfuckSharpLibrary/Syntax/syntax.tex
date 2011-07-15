@@ -1,0 +1,18 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+% https://github.com/Erkaman/EBNF-Listings-language-defintion
+\usepackage{EBNF}
+\title{Syntax of Brainfuck}
+\author{Eric Arnebäck}
+\begin{document}
+
+\maketitle
+
+\begin{EBNF}
+(* Brainfuck syntax *)
+Statement = "<" |">" | "+" | "-" | "." | "," |
+            "[" Statement "]" |
+            Statement Statement
+\end{EBNF}
+
+\end{document}
