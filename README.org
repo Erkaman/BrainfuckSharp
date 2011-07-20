@@ -5,9 +5,5 @@ A [[http://en.wikipedia.org/wiki/Brainfuck][Brainfuck]] compiler for the .NET pl
 
 * How to use?
 
-#+BEGIN_EXAMPLE
-BrainfuckSharp sourcefile.bf outputfile.exe
-#+END_EXAMPLE
-
-To compile the Brainfuck source code of sourcefile.bf to the
-executable outputfile.exe
+To find out how to use this compiler, pass the command line flags
+"--help" or -"h" to it.
